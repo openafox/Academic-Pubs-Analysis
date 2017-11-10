@@ -5,7 +5,7 @@ scan.
 To DO:
     - Create file checker to prevent errors if wrong file is selected
 """
-# Copyright 2015 Austin Fox
+# Copyright 2016 Austin Fox
 # Program is distributed under the terms of the
 # GNU General Public License see ./License for more information.
 
@@ -21,8 +21,8 @@ from builtins import (
 
 import sys, os
 import numpy as np
-from PyQt4 import QtCore, QtGui
 import csv
+from data_analysis import csv_append_col
 
 
 def importfile(datafile, savefile):
@@ -46,6 +46,7 @@ def importfile(datafile, savefile):
                 online = 0
                 # make the csv
                 makecsv(datadict, table, savefile)
+                return
 
             if line.strip() and online > 0:
                 # collect table
@@ -55,8 +56,8 @@ def importfile(datafile, savefile):
 
                 strain = (float(data[10]) /
                           datadict['Thickness [nm]'] * 100)
-                table.append([field, float(data[4]), strain,
-                             float(data[10])])
+                table.append([field, float(data[4]), strain])
+                             # float(data[10])])
                 online += 1
 
             if dat == 1:
@@ -77,7 +78,7 @@ def importfile(datafile, savefile):
                 datadict['Table Num'] += 1
                 # Set up table
                 table = [['Field [kV/cm]', 'Polarization [uC/cm2]',
-                          'Strain [%]', 'Strain [nm]', 'Item', 'data']]
+                          'Strain [%]', 'Other']]
         makecsv(datadict, table, savefile)
 
 
@@ -88,9 +89,10 @@ def makecsv(datadict, table, savefile):
              'Hysteresis Frequency [Hz]', 'Hysteresis Amplitude [V]',
              'd33ls+ [nm/V]', 'd33ls- [nm/V]', 'Prrel [uC/cm2]']
     for i, key in enumerate(order):
-        table[1 + i].append(key)
-        table[1 + i].append(datadict[key])
+        table[1 + 2*i].append(key)
+        table[2 + 2*i].append(datadict[key])
     # save table to file
+    # make file name
     namelist = [
         savefile,
         "D33ls" + str(round(datadict['d33ls+ [nm/V]'] * 1000)),
@@ -99,20 +101,20 @@ def makecsv(datadict, table, savefile):
         "table" + str(datadict['Table Num']) + ".csv"]
     name = "_".join(namelist)
     print('name: ', name)
-    with open(name, 'wb') as f:
+    with open(name, 'w') as f:
         writer = csv.writer(f)
         writer.writerows(table)
     print("done")
 
 
 if __name__ == '__main__':
-    exfiles = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
-                                           os.pardir, 'examplefiles'))
-    #list_supported_formats()
-    #print_filetype_info("bruker_raw")
-    datafile = os.path.join(exfiles, "DBLI_BBT_c017_19.dat")
-    savefile = os.path.join(exfiles, "DBLI_BBT_c017_19")
-    table = importfile(datafile, savefile)
+    from data_analysis import get_datafiles
+    location = '/Users/towel/_The_Universe/_Materials_Engr/_Mat_Systems/_BNT_BKT/_CSD/_Data/EAPSI'
+    files = get_datafiles(['*.raw'], location)
 
-
-    # Files are getting overwritten if d33 is same....
+    for f in files:
+        name = os.path.basename(f)[:-4]
+        basename = os.path.dirname(f)
+        directory = os.path.abspath(os.path.join(basename, os.pardir))
+        savename = os.path.join(directory, name)
+        importfile(f, savename)
