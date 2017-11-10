@@ -25,7 +25,7 @@ import csv
 from data_analysis import csv_append_col
 
 
-def importfile(datafile, savefile):
+def importfile(datafile, savedir, savename=None):
     """doc string
     """
 
@@ -45,7 +45,7 @@ def importfile(datafile, savefile):
                 # end table collection
                 online = 0
                 # make the csv
-                makecsv(datadict, table, savefile)
+                makecsv(datadict, table, savedir, savename)
                 return
 
             if line.strip() and online > 0:
@@ -79,10 +79,10 @@ def importfile(datafile, savefile):
                 # Set up table
                 table = [['', 'Field [kV/cm]', 'Polarization [uC/cm2]',
                           'Strain [%]']]
-        makecsv(datadict, table, savefile)
+        makecsv(datadict, table, directory, savename)
 
 
-def makecsv(datadict, table, savefile):
+def makecsv(datadict, table, savedir, savename=None):
     # add data to table
 
     order = ['SampleName', 'Table Num', 'Area [mm2]', 'Thickness [nm]',
@@ -92,15 +92,11 @@ def makecsv(datadict, table, savefile):
         table[0 + 2*i][0] = key
         table[1 + 2*i][0] = datadict[key]
     # save table to file
-    # make file name
-    namelist = [
-        savefile,
-        "D33ls" + str(round(datadict['d33ls+ [nm/V]'] * 1000)),
-        "V" + str(round(datadict['Hysteresis Amplitude [V]'])),
-        "Hz" + str(round(datadict['Hysteresis Frequency [Hz]'])),
-        "table" + str(datadict['Table Num']) + ".csv"]
-    name = "_".join(namelist)
-    print('name: ', name)
+    if not savename:
+        name = os.path.join(savedir, "DBLI.csv")
+    else:
+        name = os.path.join(savedir, savename)
+
     csv_append_col(name, table)
 
 
@@ -112,6 +108,6 @@ if __name__ == '__main__':
     for f in files:
         name = os.path.basename(f)[:-4]
         basename = os.path.dirname(f)
-        directory = os.path.abspath(os.path.join(basename, os.pardir))
-        savename = os.path.join(directory, name)
-        importfile(f, savename)
+        savedir = os.path.abspath(os.path.join(basename, os.pardir))
+        importfile(f, savedir)
+    print('Done')
