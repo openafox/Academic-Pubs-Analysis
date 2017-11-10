@@ -316,10 +316,15 @@ def fits_to_csv_PsVoigt(x, y,  name, savename, x_min=None, x_max=None, plot=True
 
 
 def csv_append_col(filename, column):
-    with open(filename+'.csv', 'rb') as f_in:
-        reader = csv.reader(f_in)
-        table = [row + [column[j]] for j, row in enumerate(reader)]
-    with open(filename+'.csv', 'wb') as f:
+    if not '.csv' in filename[-4:]:
+        filename += '.csv'
+    if os.path.exists(filename):
+        with open(filename, 'r') as f_in:
+            reader = csv.reader(f_in)
+            table = [row + column[j] for j, row in enumerate(reader)]
+    else:
+        table = column
+    with open(filename, 'w') as f:
         writer = csv.writer(f)
         writer.writerows(table)
 
