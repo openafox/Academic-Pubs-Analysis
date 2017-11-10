@@ -56,7 +56,7 @@ def importfile(datafile, savefile):
 
                 strain = (float(data[10]) /
                           datadict['Thickness [nm]'] * 100)
-                table.append([field, float(data[4]), strain])
+                table.append(['', field, float(data[4]), strain])
                              # float(data[10])])
                 online += 1
 
@@ -77,8 +77,8 @@ def importfile(datafile, savefile):
                 dat = 1
                 datadict['Table Num'] += 1
                 # Set up table
-                table = [['Field [kV/cm]', 'Polarization [uC/cm2]',
-                          'Strain [%]', 'Other']]
+                table = [['', 'Field [kV/cm]', 'Polarization [uC/cm2]',
+                          'Strain [%]']]
         makecsv(datadict, table, savefile)
 
 
@@ -89,8 +89,8 @@ def makecsv(datadict, table, savefile):
              'Hysteresis Frequency [Hz]', 'Hysteresis Amplitude [V]',
              'd33ls+ [nm/V]', 'd33ls- [nm/V]', 'Prrel [uC/cm2]']
     for i, key in enumerate(order):
-        table[1 + 2*i].append(key)
-        table[2 + 2*i].append(datadict[key])
+        table[0 + 2*i][0] = key
+        table[1 + 2*i][0] = datadict[key]
     # save table to file
     # make file name
     namelist = [
@@ -101,10 +101,7 @@ def makecsv(datadict, table, savefile):
         "table" + str(datadict['Table Num']) + ".csv"]
     name = "_".join(namelist)
     print('name: ', name)
-    with open(name, 'w') as f:
-        writer = csv.writer(f)
-        writer.writerows(table)
-    print("done")
+    csv_append_col(name, table)
 
 
 if __name__ == '__main__':
