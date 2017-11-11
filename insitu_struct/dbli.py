@@ -23,6 +23,7 @@ import sys, os
 import numpy as np
 import csv
 from data_analysis import csv_append_col
+from datasetmetta import get_name_data
 
 
 def importfile(datafile, savedir, savename=None):
@@ -31,12 +32,16 @@ def importfile(datafile, savedir, savename=None):
 
     # Set up empty dictionary of key terms
     datadict = {'SampleName': '', 'Table Num': 0, 'Area [mm2]': 0,
-                'Thickness [nm]': 0, 'Hysteresis Frequency [Hz]': 0,
-                'Hysteresis Amplitude [V]': 0, 'd33ls+ [nm/V]': 0,
-                'd33ls- [nm/V]': 0, 'Prrel [uC/cm2]': 0}
+                'Thickness [nm]': 0, 'Composition': 0,
+                'Hysteresis Frequency [Hz]': 0,
+                'Hysteresis Amplitude [V]': 0,
+                'd33ls+ [nm/V]': 0, 'd33ls- [nm/V]': 0, 'Prrel [uC/cm2]': 0}
     with open(datafile, 'r') as f:
         online = 0
         dat = 0
+        [comp, thick, num, volt] = get_name_data(os.path.basename(datafile))
+        datadict['Composition'] = comp
+
         for line in f:
             line = str(line)
             # print('line: ', line)
@@ -85,9 +90,10 @@ def importfile(datafile, savedir, savename=None):
 def makecsv(datadict, table, savedir, savename=None):
     # add data to table
 
-    order = ['SampleName', 'Table Num', 'Area [mm2]', 'Thickness [nm]',
-             'Hysteresis Frequency [Hz]', 'Hysteresis Amplitude [V]',
-             'd33ls+ [nm/V]', 'd33ls- [nm/V]', 'Prrel [uC/cm2]']
+    order = ['SampleName', 'Table Num', 'Area [mm2]', 'Composition',
+             'Thickness [nm]', 'Hysteresis Frequency [Hz]',
+             'Hysteresis Amplitude [V]', 'd33ls+ [nm/V]', 'd33ls- [nm/V]',
+             'Prrel [uC/cm2]']
     for i, key in enumerate(order):
         table[0 + 2*i][0] = key
         table[1 + 2*i][0] = datadict[key]

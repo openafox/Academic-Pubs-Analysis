@@ -28,6 +28,7 @@ from data_analysis import get_fit_all_2d
 from data_analysis import get_fit_all_1d
 import data_analysis as DA
 from bruker_data import BrukerData
+from datasetmetta import get_name_data
 
 import matplotlib.pyplot as plt
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
@@ -122,33 +123,6 @@ def plot_heatmap(data, title, mini=5, maxi=1e3, xy=None, plotpeaks=None):
     plt.show()
 
 
-def get_name_data(name):
-
-    comp_thick = {"19_24": (2.5, 200),
-                  "20_19": (2.5, 400),
-                  "20_21": (2.5, 400),
-                  "21_23": (2.5, 600),
-                  "21_09": (5, 200),
-                  "21_10": (5, 400),
-                  "20_08": (5, 400),
-                  "21_12": (5, 400),
-                  "21_29": (5, 600),
-                  "19_15": (10, 200),
-                  "20_15": (10, 400),
-                  "20_13": (10, 400),
-                  "21_36": (10, 600),
-                  "19_19": (0, 200),
-                  "20_32": (0, 400),
-                  "20_33": (0, 400),
-                  "19_33": (0, 400),
-                  "20_31": (0, 400),
-                  "20_03": (0, 600)
-                  }
-
-    comp, thick = comp_thick[name[8:13]]
-    num = name[17:19]
-    volt = name[20:23]
-    return [comp, thick, num, volt]
 
 def fits_to_csv(x, y,  name, savename, models=[models.PseudoVoigtModel],
                           x_min=None, x_max=None, plot=False):
