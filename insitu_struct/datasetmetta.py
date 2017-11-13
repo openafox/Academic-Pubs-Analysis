@@ -41,9 +41,13 @@ def get_name_data(name):
                   "20_03": (0, 600)
                   }
 
-    comp, thick = comp_thick[name[8:13]]
     num = None
     volt = None
+    if len(name) < 9:
+        comp, thick = comp_thick[name[0:2] + '_' + name[2:4]]
+        num = name[5:9]
+    if len(name) > 8:
+        comp, thick = comp_thick[name[8:13]]
     if len(name) > 16:
         num = name[17:19]
         volt = name[20:23]
