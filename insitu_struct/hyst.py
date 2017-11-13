@@ -20,16 +20,18 @@ from builtins import (
          filter, map, zip)
 # #######################
 
-import sys
+import sys, os
 import numpy as np
-import csv
 from data_analysis import get_datafiles
+from data_analysis import csv_append_col
+from datasetmetta import get_name_data
 
 
-def importfile(datafile, savefile):
+def importfile(datafile, savedir, savename=None):
     """doc string
     """
     with open(datafile, 'r') as f:
+        name = os.path.basename(datafile)[:-4]
         table = []
         start = 0
         online = -1
@@ -41,12 +43,13 @@ def importfile(datafile, savefile):
                 count = int(line)
                 print(count)
             if 7 < i < count + 9:
-                table.append([float(pt) for pt in line.split()])
+                # Get datat
+                table.append([float(pt) for i, pt in enumerate(line.split())
+                              if i < 2])
             if i == count + 9:
                 # ??? not sure on this
                 cent_y = float(line)
                 table = np.asarray(table)
-                print(table)
                 print(table.shape)
                 table[:,1] = table[:,1] - cent_y
                 print('cent_y', cent_y)
@@ -64,23 +67,30 @@ def importfile(datafile, savefile):
                 print('thick', thick)
                 print(table.shape)
                 table[:,0] = table[:,0]/(thick*0.1)
-                #table[:,0] = table[:,0] + cent_x
+                table[:,0] = table[:,0] + cent_x
 
-    savefile = savefile + ".csv"
-    with open(savefile, 'wb') as f:
-        print(table.shape)
-        writer = csv.writer(f)
-        writer.writerows(table[:,0:2])
+    table = table.tolist()
+    [comp, thick, num, volt] = get_name_data(name)
+    table.insert(0, ["Field [kV/cm]", "Polarization [uC/cm2]"])
+    table.insert(0, [comp, thick])
+    table.insert(0, [name, ''])
 
-    return [savefile]
+    # save table to file
+    if not savename:
+        name = os.path.join(savedir, "HYST.csv")
+    else:
+        name = os.path.join(savedir, savename)
 
-def get_files():
-    location = '~/_The_Universe/_Materials_Engr/_Mat_Systems/_BNT_BKT/_CSD/'
-    files = get_datafiles(['*.dat'], location)
-    return files
+    csv_append_col(name, table)
 
 if __name__ == '__main__':
-        files = get_files()
-        for f in files:
-            print(f)
-            importfile(f, f[:-4])
+    from data_analysis import get_datafiles
+    location = '/Users/towel/_The_Universe/_Materials_Engr/_Mat_Systems/_BNT_BKT/_CSD/_Data/EAPSI'
+    files = get_datafiles(['*.raw'], location)
+
+    for f in files:
+        name = os.path.basename(f)[:-4]
+        basename = os.path.dirname(f)
+        savedir = os.path.abspath(os.path.join(basename, os.pardir))
+        importfile(f, savedir)
+    print('Done')
