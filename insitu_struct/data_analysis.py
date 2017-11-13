@@ -34,14 +34,14 @@ def get_datafiles(supported_datafiles, location):
     types = ' '.join([row[0] for row in supported_datafiles])
     filetypes = 'Supported (' + types + ')'
     app = QApplication(sys.argv)
-    widget =QWidget()
-    files, _ = QFileDialog.getOpenFileNames(widget,
-                                         'Program to run',
-                                          location,
-                                          filetypes +
-                                          ';;All files (*.*)',
-                                          None,
-                                          QFileDialog.DontUseNativeDialog)
+    widget = QWidget()
+    files, _ = QFileDialog.getOpenFileNames(
+                        widget,
+                        'Program to run',
+                        location,
+                        filetypes + ';;All files (*.*)',
+                        None,
+                        QFileDialog.DontUseNativeDialog)
     return files
 
 
@@ -185,6 +185,7 @@ def get_fit_all_1d(line, x_axis, position=None, maxs=None, plot=False):
 
     return rets
 
+
 def fits_to_csv_multitype(x, y,  name, savename, models=[PseudoVoigtModel],
                           x_min=None, x_max=None, plot=False,
                           extrahead=[], extra=[], psi=False):
@@ -260,6 +261,7 @@ def fits_to_csv_multitype(x, y,  name, savename, models=[PseudoVoigtModel],
                        fit['fit'].tolist())
                        """
 
+
 def fits_to_csv_PsVoigt(x, y,  name, savename, x_min=None, x_max=None, plot=True):
 
     if x_min:
@@ -316,17 +318,39 @@ def fits_to_csv_PsVoigt(x, y,  name, savename, x_min=None, x_max=None, plot=True
 
 
 def csv_append_col(filename, column):
+
     if not '.csv' in filename[-4:]:
         filename += '.csv'
     if os.path.exists(filename):
         with open(filename, 'r') as f_in:
-            reader = csv.reader(f_in)
-            table = [row + column[j] for j, row in enumerate(reader)]
+            filetable = list(csv.reader(f_in))
+            f_len = len(filetable)
+            f_cols = num_cols(filetable)
+            c_len = len(column)
+            c_cols = num_cols(column)
+            if f_len > c_len:
+                addit = [[""] * c_cols] * (f_len - c_len)
+                column = column + addit
+            if f_len < c_len:
+                addit = [[""] * f_cols] * (c_len - f_len)
+                cols = num_cols(filetable)
+                filetable += (addit)
+
+            if c_cols == 1 and not isinstance(column[0], list):
+                table = [row + [column[j]] for j, row in enumerate(filetable)]
+            else:
+                table = [row + column[j] for j, row in enumerate(filetable)]
+
     else:
         table = column
     with open(filename, 'w') as f:
         writer = csv.writer(f)
         writer.writerows(table)
+
+def num_cols(array):
+    if isinstance(array[0], list):
+        return len(array[0])
+    return 1
 
 
 def fits_to_csv_autopeaks(x, y, savename):
@@ -342,6 +366,7 @@ def fits_to_csv_autopeaks(x, y, savename):
         writer = csv.writer(f)
         writer.writerows(table)
 
+
 # Future adds deconvolving peaks
 # http://kitchingroup.cheme.cmu.edu/blog/2013/01/29/Curve-fitting-to-get-overlapping-peak-areas/
 # https://stackoverflow.com/questions/10143905/python-two-curve-gaussian-fitting-with-non-linear-least-squares
@@ -350,4 +375,25 @@ def fits_to_csv_autopeaks(x, y, savename):
 
 
 if __name__ == '__main__':
-    get_datafiles([".txt"])
+    # datafile = get_datafiles([".txt"])
+
+    # Test csv_append_col #
+    exfiles = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
+                                           'examplefiles'))
+    crnt_file = os.path.join(exfiles, "CRNT.csv")
+    with open(crnt_file, 'r') as f_in:
+            reader = csv.reader(f_in)
+            col_len = len(list(reader))
+    add_col = []
+    # add_col.append(list(range(0, col_len - 10)))
+    # add_col.append([[x] for x in range(0, col_len)])
+    add_col.append(np.linspace(0, 10, col_len - 10).tolist())
+    add_col.append(np.linspace(0, 10, col_len - 10).tolist())
+    #for col in add_col:
+    #    csv_append_col(crnt_file, col)
+    #    print('try')
+    add_col = list(map(list, zip(*add_col)))
+    print(len(add_col), len(add_col[0]))
+    csv_append_col(crnt_file, add_col)
+    print('done')
+    #########################
