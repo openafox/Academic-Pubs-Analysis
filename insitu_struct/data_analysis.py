@@ -318,7 +318,8 @@ def fits_to_csv_PsVoigt(x, y,  name, savename, x_min=None, x_max=None, plot=True
 
 
 def csv_append_col(filename, column):
-
+    """Append columns to a csv file.
+    Column(s) to add can be of any dimention"""
     if not '.csv' in filename[-4:]:
         filename += '.csv'
     if os.path.exists(filename):
