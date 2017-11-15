@@ -317,9 +317,12 @@ def fits_to_csv_PsVoigt(x, y,  name, savename, x_min=None, x_max=None, plot=True
                        fit['fit'].tolist())
 
 
-def csv_append_col(filename, column):
+def csv_append_col(filename, column, len_policy="ls"):
     """Append columns to a csv file.
-    Column(s) to add can be of any dimention"""
+    len_policy allows column(s) to add to be longer 'l', shorter 's', or
+    require the exact lengths 'not l or s' as the table in the file.
+    'ls' or 'sl' is also valid.
+    """
     if not isinstance(column, list):
         if isinstance(column, np.ndarray):
             column = column.tolist()
@@ -336,12 +339,23 @@ def csv_append_col(filename, column):
             c_len = len(column)
             c_cols = num_cols(column)
             if f_len > c_len:
-                addit = [[""] * c_cols] * (f_len - c_len)
-                column = column + addit
+                if "s" in len_policy:
+                    addit = [[""] * c_cols] * (f_len - c_len)
+                    column = column + addit
+                else:
+                    raise ValueError("column (len=%d) can not be shorter then "
+                            "the table in the file (len=%d), unless "
+                            "len_policy='s'" % (c_len, f_len))
+
             if f_len < c_len:
-                addit = [[""] * f_cols] * (c_len - f_len)
-                cols = num_cols(filetable)
-                filetable += (addit)
+                if "l" in len_policy:
+                    addit = [[""] * f_cols] * (c_len - f_len)
+                    cols = num_cols(filetable)
+                    filetable += (addit)
+                else:
+                    raise ValueError("column (len=%d) can not be longer then "
+                            "the table in the file (len=%d), unless "
+                            "len_policy='l'" % (c_len, f_len))
 
             if c_cols == 1 and not isinstance(column[0], list):
                 table = [row + [column[j]] for j, row in enumerate(filetable)]
@@ -392,15 +406,15 @@ if __name__ == '__main__':
             reader = csv.reader(f_in)
             col_len = len(list(reader))
     add_col = []
-    # add_col.append(list(range(0, col_len - 10)))
-    # add_col.append([[x] for x in range(0, col_len)])
+    add_col.append(list(range(0, col_len - 10)))
+    add_col.append([[x] for x in range(0, col_len)])
     add_col.append(np.linspace(0, 10, col_len - 10).tolist())
-    add_col.append(np.linspace(0, 10, col_len - 10).tolist())
-    #for col in add_col:
-    #    csv_append_col(crnt_file, col)
-    #    print('try')
-    add_col = list(map(list, zip(*add_col)))
-    print(len(add_col), len(add_col[0]))
-    csv_append_col(crnt_file, add_col)
-    print('done')
+    # add_col.append(np.linspace(0, 10, col_len - 10).tolist())
+    for col in add_col:
+        csv_append_col(crnt_file, col, '')
+        print('try')
+    #add_col = list(map(list, zip(*add_col)))
+    #print(len(add_col), len(add_col[0]))
+    #csv_append_col(crnt_file, add_col)
+    #print('done')
     #########################
