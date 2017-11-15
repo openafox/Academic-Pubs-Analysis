@@ -114,6 +114,7 @@ if __name__ == '__main__':
     for f in files:
         name = os.path.basename(f)[:-4]
         basename = os.path.dirname(f)
-        savedir = os.path.abspath(os.path.join(basename, os.pardir))
+        # savedir = os.path.abspath(os.path.join(basename, os.pardir))
+        savedir = os.path.abspath(basename)
         importfile(f, savedir)
     print('Done')
