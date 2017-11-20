@@ -84,7 +84,7 @@ def importfile(datafile, savedir, savename=None):
                 # Set up table
                 table = [['', 'Field [kV/cm]', 'Polarization [uC/cm2]',
                           'Strain [%]']]
-        makecsv(datadict, table, directory, savename)
+        makecsv(datadict, table, savedir, savename)
 
 
 def makecsv(datadict, table, savedir, savename=None):
