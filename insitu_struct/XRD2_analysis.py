@@ -274,10 +274,7 @@ if __name__ == '__main__':
             lines.append(smapT[xs[i*3], ys[i*3]:ys[i*3+1]])
             """
             # Do Fit
-            ret = get_fit(lines[0], lines[1])
-            savename = os.path.join(basename, '%s_psi' % peaks[i])
-            fits_to_csv2(lines[0], lines[1], name, savename, plot=False)
-            """
+
             mods = [models.Pearson7Model, models.VoigtModel,
                     models.PseudoVoigtModel]
             directory = os.path.abspath(os.path.join(basename, os.pardir))
@@ -286,7 +283,7 @@ if __name__ == '__main__':
             DA.fits_to_csv_multitype(lines[0], lines[1], name, savename,  mods,
                                      extrahead=['comp', 'thick', 'num', 'volt'],
                                      extra=get_name_data(name), psi=True)
-
+            """
             # get 2th lines and fits
             # get x
             lines.append(data.x[xs[i*3+1]:xs[i*3+2]])
@@ -297,7 +294,7 @@ if __name__ == '__main__':
             lines.append(data.smap[ys[i*3+2], xs[i*3+1]:xs[i*3+2]])
 
             # Do Fits
-
+            """
             mods = [models.Pearson7Model, models.VoigtModel,
                     models.PseudoVoigtModel]
             directory = os.path.abspath(os.path.join(basename, os.pardir))
@@ -306,7 +303,11 @@ if __name__ == '__main__':
             DA.fits_to_csv_multitype(lines[3], lines[4], name, savename,  mods,
                                      extrahead=['comp', 'thick', 'num', 'volt'],
                                      extra=get_name_data(name))
-
+            """
+            directory = os.path.abspath(os.path.join(basename, os.pardir))
+            savename = os.path.join(directory, '%s_2th' % peaks[i])
+            DA.fit_data_to_csv(lines[3], lines[4], name, savename,
+                    plot=False)
             """
             ret = []
             plot=False

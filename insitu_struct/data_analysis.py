@@ -246,23 +246,11 @@ def fits_to_csv_multitype(x, y,  name, savename, models=[PseudoVoigtModel],
     with open(savename+'fits.csv', 'a') as f:
         writer = csv.writer(f)
         writer.writerows(table)
-    # Append column to csv
-    """
-    if not os.path.exists(savename+'fitdata.csv'):
-        table = [[x[x1:x2][j]] + [y[x1:x2][j]] + [row] for j, row in
-                 enumerate(fit['fit'].tolist())]
-        table.insert(0, ['angle', name, name + '_fit'])
-        with open(savename+'fitdata.csv', 'wb') as f:
-            writer = csv.writer(f)
-            writer.writerows(table)
-    else:
-        csv_append_col(savename+'fitdata', [name] + y[x1:x2].tolist())
-        csv_append_col(savename+'fitdata', [name + '_fit'] +
-                       fit['fit'].tolist())
-                       """
 
 
-def fits_to_csv_PsVoigt(x, y,  name, savename, x_min=None, x_max=None, plot=True):
+def fit_data_to_csv(x, y,  name, savename,
+                     x_min=None, x_max=None,
+                     model=PseudoVoigtModel, plot=True):
 
     if x_min:
         x1 = np.abs(x-x_min).argmin()
@@ -273,42 +261,14 @@ def fits_to_csv_PsVoigt(x, y,  name, savename, x_min=None, x_max=None, plot=True
     else:
         x2 = len(x) - 1
 
-    fit = get_fit(x[x1:x2], y[x1:x2], plot=plot)
+    fit = get_fit(x[x1:x2], y[x1:x2], plot=plot, model=model)
 
-    table = []
-    # explination of how to calc errors - propegation
-    # https://chem.libretexts.org/Core/Analytical_Chemistry/Quantifying_Nature/Significant_Digits/Propagation_of_Error
-    height_error = (((fit['fra_error'])*fit['amp_error']) /
-                    (fit['sig_error']*np.sqrt(2*np.pi)) +
-                    (fit['fra_error']*fit['amp_error']) /
-                    (fit['sig_error']*np.pi))
-    # print(ret['amp_error'], ret['cen_error'],
-    #       ret['sig_error'], ret['fra_error'])
-    if not os.path.exists(savename+'fits.csv'):
-        table = [['name', 'cent', 'cent_error',
-                  'd', 'd*2',
-                  'StDev',
-                  'mid_obs',
-                  'fwhm', 'fwhm_error',
-                  'Area', 'Area_error',
-                  'height', 'height_error', 'height_obs', 'R^2']]
-    table.append([name, fit['cen'], fit['cen_error'],
-                  '=1.540598/(SIN(B2*PI()/360)*2)', '=2*D2',
-                  '=0.192575*SIN(B2*PI()/360)*CSC(B2*PI()/360)^3*C2*PI()/180',
-                  fit['mid_obs'],
-                  fit['fwhm'], fit['sig_error']*2,
-                  fit['amp'], fit['amp_error'],
-                  fit['height_obs'], height_error, fit['height'], fit['r^2']]
-                 )
-    with open(savename+'fits.csv', 'ab') as f:
-        writer = csv.writer(f)
-        writer.writerows(table)
     # Append column to csv
     if not os.path.exists(savename+'fitdata.csv'):
         table = [[x[x1:x2][j]] + [y[x1:x2][j]] + [row] for j, row in
                  enumerate(fit['fit'].tolist())]
         table.insert(0, ['angle', name, name + '_fit'])
-        with open(savename+'fitdata.csv', 'wb') as f:
+        with open(savename+'fitdata.csv', 'w') as f:
             writer = csv.writer(f)
             writer.writerows(table)
     else:
@@ -393,6 +353,9 @@ def fits_to_csv_autopeaks(x, y, savename):
 # https://stackoverflow.com/questions/10143905/python-two-curve-gaussian-fitting-with-non-linear-least-squares
 # and for ideas
 # https://www.wavemetrics.com/products/igorpro/dataanalysis/peakanalysis/multipeakfitting.htm
+
+# explination of how to calc errors - propegation
+# https://chem.libretexts.org/Core/Analytical_Chemistry/Quantifying_Nature/Significant_Digits/Propagation_of_Error
 
 
 if __name__ == '__main__':
