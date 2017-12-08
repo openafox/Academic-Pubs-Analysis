@@ -187,8 +187,9 @@ def get_fit_all_1d(line, x_axis, position=None, maxs=None, plot=False):
 
 
 def fits_to_csv_multitype(x, y,  name, savename, models=[PseudoVoigtModel],
-                          x_min=None, x_max=None, plot=False,
-                          extrahead=[], extra=[], psi=False):
+                          x_min=None, x_max=None, psi=False,
+                          extrahead=[], extra=[],
+                          plot=False, plot_all=False, print_out=False):
 
     if len(extrahead) != len(extra):
         raise  Exception('extrahead and extra must be of same length')
@@ -209,6 +210,30 @@ def fits_to_csv_multitype(x, y,  name, savename, models=[PseudoVoigtModel],
     for model in models:
         mod_nms.append(model.__name__[0:-5])
         fits.append(get_fit(x[x1:x2], y[x1:x2], plot=plot, model=model))
+
+    # Print all fits as a Table
+    if print_out:
+        print(' '*20, ''.join('{:^20s}'.format(s) for s in mod_nms))
+        all_keys = [k for d in fits for k in d.keys()]
+        keys = {k for k in all_keys if all_keys.count(k)==len(fits)}
+        for key in keys:
+            if key != 'full' and key != 'fit':
+                print('{:^20s}'.format(key),
+                      ''.join('{:^20f}'.format(fit[key]) for fit in fits))
+    # plot all together
+    if plot_all:
+        fig, ax = plt.subplots()
+        ax.plot(x[x1:x2], y[x1:x2]-min(y))
+        for j, mod_nm in enumerate(mod_nms):
+            ax.plot(x[x1:x2], fits[j]['fit'], label=mod_nm)
+        ax.legend()
+        # ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", ncol=3)
+        ax.set_ylabel('Intensity')
+        if psi:
+            ax.set_xlabel(u'\u03a8[\u00b0]')
+        else:
+            ax.set_xlabel(u'2\u03b8[\u00b0]')
+        plt.show()
 
     # make table for csv (really a row unless adding header)
     table = []
