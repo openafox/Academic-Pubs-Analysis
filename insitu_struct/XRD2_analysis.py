@@ -33,6 +33,8 @@ from datasetmetta import get_name_data
 import matplotlib.pyplot as plt
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import matplotlib.patheffects as path_effects
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 import csv
 from lmfit import models
 from lmfit import lineshapes
@@ -69,33 +71,42 @@ def merge_data(files):
         file_list.append(datafile)
     return data_list, file_list
 
+def colorbar(mappable):
+    #http://joseph-long.com/writing/colorbars/
+    ax = mappable.axes
+    fig = ax.figure
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    return fig.colorbar(mappable, cax=cax)
 
-def plot_heatmap(data, title, mini=5, maxi=1e3, xy=None, plotpeaks=None):
+def plot_heatmap(data, title=None, mini=5, maxi=1e3, xy=None, plotpeaks=None):
     # colors
     # https://matplotlib.org/users/colormaps.html
     # https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolor.html
-    axlables = {'family':               'serif',
+    axlabels = {'family':               'sans',
                 'color':                'black',
                 'weight':               'normal',
                 'size':                 20,
                 }
-    titles = {'family':                 'serif',
+    titles = {'family':                 'sans',
               'color':                  'black',
               'weight':                 'normal',
               'size':                   24,
               }
-    lables = {'family':                 'serif',
-              'fontname':               'DejaVu Serif',
+    labels = {'family':                 'sans',
+              'fontname':               'DejaVu Sans',
               'color':                  '#66ff33',
               'weight':                 'normal',
-              'size':                   16,
+              'size':                   14,
               'verticalalignment':      'center',
               'horizontalalignment':    'right'
               }
-    fig, ax = plt.subplots()
-    # fig = Figure(figsize=(12, 6), dpi=100)
-    # ax = fig.add_subplot(111)
-    ax.set_title(os.path.basename(data.filename))
+
+    fig = plt.figure(figsize=(10, 6), dpi=100)
+    ax = fig.add_subplot(111)
+
+    if title:
+        ax.set_title(title, fontdict=titles)
     plot = ax.pcolormesh(data.x, data.y, data.smap, vmin=mini, vmax=maxi,
                          cmap='viridis')  # alpha=0.8)
     # plt.pcolor(x, y, data, norm=LogNorm(vmin=data.min()+5,
@@ -104,9 +115,14 @@ def plot_heatmap(data, title, mini=5, maxi=1e3, xy=None, plotpeaks=None):
     ax.set_ylabel(u'\u03A8[\u00b0]', fontdict=titles)
     if xy is not None:
         points = ax.plot(xy[:, 1], xy[:, 0], 'ro', markersize=1)
-    # fig.colorbar(plot)
-    # figure out later
-    # plt.tick_params(fontdict=axlables)
+    cbar = colorbar(plot)
+    cbar.set_ticks([0, 1])
+    cbar.set_ticklabels(["", ""])
+    cbar.set_label("Intensity [arbitrary units]", fontdict=titles)
+    # Set axis tick labels font
+    for label in (ax.get_xticklabels() + ax.get_yticklabels()):
+        for prop in axlabels:
+            getattr(label, 'set_' + prop)(axlabels[prop])
     if plotpeaks:
         # fastest?
         # https://softwarerecs.stackexchange.com/questions/7463/fastest-python-library-to-read-a-csv-file
@@ -117,10 +133,11 @@ def plot_heatmap(data, title, mini=5, maxi=1e3, xy=None, plotpeaks=None):
                 if (data.x.min() < float(peak[0]) < data.x.max() and
                         data.y.min() < float(peak[1]) < data.y.max()):
                     txt = ax.text(float(peak[0]), float(peak[1]), peak[2],
-                                  fontdict=lables)
+                                  fontdict=labels)
                     txt.set_path_effects([path_effects.Stroke(linewidth=1,
                                          foreground='black'),
                                          path_effects.Normal()])
+    plt.tight_layout()
     plt.show()
 
 
@@ -137,7 +154,7 @@ if __name__ == '__main__':
     for i, data in enumerate(data_list):
 
         # Plot heat maps
-        if False:
+        if True:
             xy_raw = find_peaks_2d(data.smap)
             # rescale xy peaks
             xy = np.asarray([data.get_real_xy(row[1], row[0])
@@ -145,12 +162,14 @@ if __name__ == '__main__':
             xy = np.roll(xy, 1, axis=1)  # quick fix. need to do properly
 
             mini = data.smap.min()
-            maxi = data.smap.max()*.1
+            ## make this base on fit of distribution??
+            maxi = data.smap.max()*0.005
             peakfile = os.path.join(os.path.dirname(__file__),
                                     'BNKT_peaks.csv')
-            plot_heatmap(data, os.path.basename(file_list[i])[:19], maxi=maxi)
-            plot_heatmap(data, os.path.basename(file_list[i])[:19], maxi=maxi,
-                         xy=xy, plotpeaks=peakfile)
+            plot_heatmap(data, maxi=maxi)
+            # plot_heatmap(data, os.path.basename(file_list[i])[:19], maxi=maxi,
+                         # xy=xy, plotpeaks=peakfile)
+            plot_heatmap(data, maxi=maxi, plotpeaks=peakfile)
 
         # Do fits of all Automagically and save in CSV
         if False:
@@ -170,7 +189,7 @@ if __name__ == '__main__':
                 writer.writerows(table)
 
         # Manually fit a specific ranges
-        if True:
+        if False:
             # insitue data
             if True:
                 xs = [0]*9
