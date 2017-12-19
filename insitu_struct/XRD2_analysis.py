@@ -69,41 +69,42 @@ def merge_data(files):
         file_list.append(datafile)
     return data_list, file_list
 
+
 def plot_heatmap(data, title, mini=5, maxi=1e3, xy=None, plotpeaks=None):
     # colors
     # https://matplotlib.org/users/colormaps.html
     # https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolor.html
-    axlables = {'family': 'serif',
-                'color':  'black',
-                'weight': 'normal',
-                'size': 14,
+    axlables = {'family':               'serif',
+                'color':                'black',
+                'weight':               'normal',
+                'size':                 20,
                 }
-    titles = {'family': 'serif',
-                'color':  'black',
-                'weight': 'normal',
-                'size': 16,
-                }
+    titles = {'family':                 'serif',
+              'color':                  'black',
+              'weight':                 'normal',
+              'size':                   24,
+              }
     lables = {'family':                 'serif',
-                'fontname':               'DejaVu Serif',
-                'color':                  '#66ff33',
-                'weight':                 'normal',
-                'size':                   12,
-                'verticalalignment':      'center',
-                'horizontalalignment':    'right'
-                }
+              'fontname':               'DejaVu Serif',
+              'color':                  '#66ff33',
+              'weight':                 'normal',
+              'size':                   16,
+              'verticalalignment':      'center',
+              'horizontalalignment':    'right'
+              }
     fig, ax = plt.subplots()
-    #fig = Figure(figsize=(12, 6), dpi=100)
-    #ax = fig.add_subplot(111)
+    # fig = Figure(figsize=(12, 6), dpi=100)
+    # ax = fig.add_subplot(111)
     ax.set_title(os.path.basename(data.filename))
     plot = ax.pcolormesh(data.x, data.y, data.smap, vmin=mini, vmax=maxi,
-                        cmap='viridis')  # alpha=0.8)
+                         cmap='viridis')  # alpha=0.8)
     # plt.pcolor(x, y, data, norm=LogNorm(vmin=data.min()+5,
     #            vmax=data.max(), cmap='viridis') #alpha=0.8)
     ax.set_xlabel('2\u03b8[\u00b0]', fontdict=titles)
     ax.set_ylabel(u'\u03A8[\u00b0]', fontdict=titles)
     if xy is not None:
         points = ax.plot(xy[:, 1], xy[:, 0], 'ro', markersize=1)
-    #fig.colorbar(plot)
+    # fig.colorbar(plot)
     # figure out later
     # plt.tick_params(fontdict=axlables)
     if plotpeaks:
@@ -111,10 +112,10 @@ def plot_heatmap(data, title, mini=5, maxi=1e3, xy=None, plotpeaks=None):
         # https://softwarerecs.stackexchange.com/questions/7463/fastest-python-library-to-read-a-csv-file
         with open(plotpeaks, 'r') as f:
             peaks = csv.reader(row for row in f if not
-                                row.startswith('#'))
+                               row.startswith('#'))
             for peak in peaks:
                 if (data.x.min() < float(peak[0]) < data.x.max() and
-                    data.y.min() < float(peak[1]) < data.y.max()):
+                        data.y.min() < float(peak[1]) < data.y.max()):
                     txt = ax.text(float(peak[0]), float(peak[1]), peak[2],
                                   fontdict=lables)
                     txt.set_path_effects([path_effects.Stroke(linewidth=1,
@@ -133,19 +134,20 @@ if __name__ == '__main__':
     data_list, file_list = merge_data(files)
     print(len(data_list))
 
-
     for i, data in enumerate(data_list):
 
         # Plot heat maps
         if False:
             xy_raw = find_peaks_2d(data.smap)
             # rescale xy peaks
-            xy = np.asarray([data.get_real_xy(row[1], row[0]) for row in xy_raw])
+            xy = np.asarray([data.get_real_xy(row[1], row[0])
+                             for row in xy_raw])
             xy = np.roll(xy, 1, axis=1)  # quick fix. need to do properly
 
-            mini=data.smap.min()
-            maxi=data.smap.max()*.1
-            peakfile = os.path.join(os.path.dirname(__file__), 'BNKT_peaks.csv')
+            mini = data.smap.min()
+            maxi = data.smap.max()*.1
+            peakfile = os.path.join(os.path.dirname(__file__),
+                                    'BNKT_peaks.csv')
             plot_heatmap(data, os.path.basename(file_list[i])[:19], maxi=maxi)
             plot_heatmap(data, os.path.basename(file_list[i])[:19], maxi=maxi,
                          xy=xy, plotpeaks=peakfile)
@@ -153,7 +155,8 @@ if __name__ == '__main__':
         # Do fits of all Automagically and save in CSV
         if False:
             # fit all 2th lines
-            out_2th = get_fit_all_2d(data.smap, xy_raw, data.x, data.y, plot=False)
+            out_2th = get_fit_all_2d(data.smap, xy_raw, data.x, data.y,
+                                     plot=False)
             # fit all psi lines
             smapT = data.smap.copy().T
             xy_raw = np.roll(xy_raw, 1, axis=1)
@@ -162,7 +165,7 @@ if __name__ == '__main__':
             table = []
             for i, row in enumerate(xy):
                 table.append([row[0], row[1], out_2th[i][2], out_psi[i][2]])
-            with open(datafile[:-11] +'.csv', 'wb') as f:
+            with open(datafile[:-11] + '.csv', 'wb') as f:
                 writer = csv.writer(f)
                 writer.writerows(table)
 
@@ -174,7 +177,8 @@ if __name__ == '__main__':
                 ys = [0]*9
                 peaks = []
                 # if specific to insitue flat measurement
-                if data.y[0] < 0 < data.y[-1] and data.x[0] < 46 < data.x[-1]:
+                if (data.y[0] < 0 < data.y[-1] and
+                        data.x[0] < 46 < data.x[-1]):
                     peaks.append('200')
                     xs[0], ys[0] = data.get_index_xy(46.79, -10)
                     xs[1], ys[1] = data.get_index_xy(41, 10)
@@ -184,7 +188,8 @@ if __name__ == '__main__':
                     xs[4], ys[4] = data.get_index_xy(35, 10)
                     xs[5], ys[5] = data.get_index_xy(45, 0)
                 # if specific to insitue tilted measurement
-                elif data.y[0] < 45 < data.y[-1] and data.x[0] < 32 < data.x[-1]:
+                elif (data.y[0] < 45 < data.y[-1] and
+                      data.x[0] < 32 < data.x[-1]):
                     peaks.append('110')
                     xs[0], ys[0] = data.get_index_xy(32.56, 30)
                     xs[1], ys[1] = data.get_index_xy(30, 60)
@@ -199,7 +204,8 @@ if __name__ == '__main__':
                     xs[8], ys[8] = data.get_index_xy(51, 54.74)
             # full map data
             if False:
-                peakfile = os.path.join(os.path.dirname(__file__), 'BNKT_peaks.csv')
+                peakfile = os.path.join(os.path.dirname(__file__),
+                                        'BNKT_peaks.csv')
                 ## make peak file auto creat arrays as below
                 peak = '100'
                 x1, y1 = data.get_index_xy(22.93, -10)
@@ -236,7 +242,8 @@ if __name__ == '__main__':
                     # Do fit
                     savename = os.path.join(directory, '%s_psi' % peaks[i])
                     if True:
-                        DA.fits_to_csv_multitype(x, y, name, savename,  mods,
+                        DA.fits_to_csv_multitype(
+                                    x, y, name, savename,  mods,
                                     psi=True,
                                     extrahead=['comp', 'thick', 'num', 'volt'],
                                     extra=get_name_data(name),
@@ -257,7 +264,8 @@ if __name__ == '__main__':
                     # Do Fit
                     savename = os.path.join(directory, '%s_2th' % peaks[i])
                     if True:
-                        DA.fits_to_csv_multitype(x, y, name, savename,  mods,
+                        DA.fits_to_csv_multitype(
+                                    x, y, name, savename,  mods,
                                     psi=False,
                                     extrahead=['comp', 'thick', 'num', 'volt'],
                                     extra=get_name_data(name),
@@ -266,7 +274,6 @@ if __name__ == '__main__':
                     # Fit data to csv
                     if False:
                         DA.fit_data_to_csv(x, y, name, savename, plot=False)
-
 
     """
     ## Plot in difrent ways ######################################
