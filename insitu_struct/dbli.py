@@ -49,9 +49,10 @@ def importfile(datafile, savedir, savename=None):
             if online > 0 and not line.strip():
                 # end table collection
                 online = 0
+                # reset metta data collection
+                dat = 0
                 # make the csv
                 makecsv(datadict, table, savedir, savename)
-                return
 
             if line.strip() and online > 0:
                 # collect table
