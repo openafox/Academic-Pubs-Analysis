@@ -239,6 +239,7 @@ class BrukerData(object):
 
         if b"RAW1.01" not in filecontent[0:8]:
             raise Exception("invalid file type must be RAW1.01")
+            #add other versions and gfrm
         return filecontent
 
     def get_range(self, pos):
@@ -247,9 +248,23 @@ class BrukerData(object):
         pos += rng.metta['header_len']
         rng.counts_data = []
         (typ, ) = struct.unpack('<I', self.filecontent[pos: pos+4])
-        if typ == 200:
-            # Check type of supplemental
+        # Check type of supplemental
+        if typ == 200:  # Area Detector Parameters
             rng.supmetta = self.get_metta(BrukerSupplementalHeader(), pos)
+        elif typ == 190:  # offset assigned by EVA
+            pass
+        elif typ == 150:  # removed data for search
+            pass
+        elif typ == 140:  # comment
+            pass
+        elif typ == 130:  # QCI parameters (obsolete)
+            pass
+        elif typ == 120:  # OQM parameters
+            pass
+        elif typ == 110:  # PSD parameters
+            pass
+        elif typ == 100:  # oscillation parameters
+            pass
         pos += rng.metta['sup_len']
         data_len = rng.metta['steps']
         for i in range(data_len):
