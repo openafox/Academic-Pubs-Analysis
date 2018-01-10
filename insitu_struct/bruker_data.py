@@ -238,7 +238,7 @@ class BrukerData(object):
             with open(filename, mode='rb') as f:  # b is important -> binary
                 filecontent = f.read()
         except IOError as e:
-            print("I/O error({0}): {1}".format(e.errno, e.strerror))
+            raise Exception("I/O error({0}): {1}".format(e.errno, e.strerror))
 
         if b"RAW1.01" not in filecontent[0:8]:
             raise Exception("invalid file type must be RAW1.01")
@@ -251,7 +251,6 @@ class BrukerData(object):
         pos += rng.metta['header_len']
         rng.counts_data = []
         (typ, ) = struct.unpack('<I', self.filecontent[pos: pos+4])
-        print(typ)
         # Check type of supplemental
         if typ == 200:  # Area Detector Parameters
             rng.supmetta = self.get_metta(BrukerSupplementalHeader(), pos)
@@ -367,11 +366,9 @@ class BrukerData(object):
     def __add__(self, other):
         try:
             if not np.array_equal(self.y, other.y):
-                print('Must have same y scale')
-                raise
+                raise Exception('Must have same y scale')
         except:
-            print('Type mismatch, must be BrukerData')
-            raise
+            raise Exception('Type mismatch, must be BrukerData')
         ret = BrukerData()
         ret.y = self.y
         ret.smap = np.concatenate((self.smap, other.smap), axis=1)
