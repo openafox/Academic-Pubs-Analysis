@@ -189,7 +189,7 @@ if __name__ == '__main__':
                 writer.writerows(table)
 
         # Manually fit a specific ranges
-        if False:
+        if True:
             # insitue data
             if True:
                 xs = [0]*9
@@ -215,12 +215,24 @@ if __name__ == '__main__':
                     xs[2], ys[2] = data.get_index_xy(35, 45)
                     peaks.append('111')
                     xs[3], ys[3] = data.get_index_xy(40.12, 50)
-                    xs[4], ys[4] = data.get_index_xy(35, 60)
-                    xs[5], ys[5] = data.get_index_xy(45, 54.74)
+                    xs[4], ys[4] = data.get_index_xy(38, 60)
+                    xs[5], ys[5] = data.get_index_xy(40.5, 54.74)
+                    #xs[4], ys[4] = data.get_index_xy(35, 60)
+                    #xs[5], ys[5] = data.get_index_xy(45, 54.74)
                     peaks.append('Pt200_111')
                     xs[6], ys[6] = data.get_index_xy(46.24, 45)
-                    xs[7], ys[7] = data.get_index_xy(41, 65)
-                    xs[8], ys[8] = data.get_index_xy(51, 54.74)
+                    xs[7], ys[7] = data.get_index_xy(42, 65)
+                    xs[8], ys[8] = data.get_index_xy(50, 54.74)
+            # Si
+            if True:
+                xs = [0]*3
+                ys = [0]*3
+                peaks = []
+                # if specific to insitue flat measurement
+                peaks.append('Si_400')
+                xs[0], ys[0] = data.get_index_xy(69.132, -10)
+                xs[1], ys[1] = data.get_index_xy(68, 10)
+                xs[2], ys[2] = data.get_index_xy(72, 0)
             # full map data
             if False:
                 peakfile = os.path.join(os.path.dirname(__file__),
@@ -288,8 +300,8 @@ if __name__ == '__main__':
                                     psi=False,
                                     extrahead=['comp', 'thick', 'num', 'volt'],
                                     extra=get_name_data(name),
-                                    plot=False, plot_all=True,
-                                    print_out=True)
+                                    plot=True, plot_all=False,
+                                    print_out=False)
                     # Fit data to csv
                     if False:
                         DA.fit_data_to_csv(x, y, name, savename, plot=False)
